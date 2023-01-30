@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ item.name }}</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="{% static 'style.css' %}" type="text/css" />
+    <script type="text/javascript" src="{% static "jquery.cookie.js" %}"></script>
+</head>
+<body>
+{% include 'template.html' %}
+
+<div class="header" id="header">
+<div class="container" style="position: center; margin-top:20px;margin-left: 10px;">
+    <a class="btn btn-success" href="{% url 'index' %}">
+            <img src="{% static 'arrow_back_ios-24px.svg' %}" alt="row">Hlavní stránka</a>
+</div>
+</div>
+
+
+<div class="container" style="position: center; margin-top:30px;">
+    <div class="row">
+        <div class="col-sm">
+            <h1>{{ item.name }}</h1>
+            <p>{{ item.description }}</p>
+            <p>Přidáno: {{ item.datetime|date:'d-m-Y H:i' }}</p>
+            <br><br>
+        <H2>Soubory</H2>
+        <br>
+            {% for f in item.files.all %}
+                <H3>{{ f.title }}</H3>
+                <p>Velikost: {{ f.file.size }} B</p>
+                <a href="{% url 'download' %}?file={{ f.file.name }}">Stáhnout soubor</a>
+                <br><br>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

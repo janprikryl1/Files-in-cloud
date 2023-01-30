@@ -1,0 +1,24 @@
+{% load static %}
+<body>
+    <div style="margin: 20px; text-align: center;">
+      <a href="{% url 'index' %}"><h1>Vyhledávání</h1></a>
+</div>
+
+  <div class="container" style="position: center; margin-top:30px;">
+      <div class="row">
+          <div class="col-sm-9" style="position: center;">
+                  <form method="get" action="{% url 'search' %}">
+                      <div class="row">
+                         <div class="col">
+                            <input type="text" name="name" class="form-control" required/>
+                         </div>
+                         <div class="col-sm">
+                            <input type="submit" class="btn btn-success" placeholder="Vyhledat">
+                         </div>
+                         </div>
+                  </form>
+          </div>
+      </div>
+  </div>
+</body>
+</html>

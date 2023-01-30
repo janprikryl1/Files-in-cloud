@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Vyhledávání</title>
+     {% load static %}
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="{% static 'style.css' %}" type="text/css" />
+    <script type="text/javascript" src="{% static "jquery.cookie.js" %}"></script>
+    <script>
+        var ids = [];
+        var elms = [];
+    </script>
+</head>
+<body>
+{% if user.is_authenticated %}
+    {% include 'template.html' %}
+
+    <div class="container" style="margin-top: 30px; position: center;">
+         <div class="row">
+              <div class="col-sm">
+                  <h2>Aktuální počet nahraných souborů: {{ number }}</h2>
+              </div>
+              <div class="col-sm">
+                  <h2>Nahrát soubory</h2>
+                    <div>
+                            {% csrf_token %}
+                            <input type="text" class="form-control" placeholder="Název souboru" id="name"/>
+                            <textarea placeholder="popisek" id="popisek" rows="4" cols="50"></textarea>
+                                <p>Soubory:</p>
+                                <p id="files_list"></p>
+                                <button onclick="$('#FotkyexampleModalLong').modal();" class="btn btn-outline-success">
+                                    <svg class="bi bi-plus-circle" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                      <path fill-rule="evenodd" d="M8 3.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
+                                      <path fill-rule="evenodd" d="M7.5 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8z"/>
+                                      <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    </svg>
+                                </button>
+                            <input type="submit" id="send" class="btn btn-primary"/>
+                            <a href="{% url 'lg_out' %}" class="btn btn-warning">Odhlásit se</a>
+                    </div>
+              </div>
+         </div>
+    </div>
+
+    <!-- +Fotky -->
+    <div class="modal fade" id="FotkyexampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Přidat fotky</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <form enctype="multipart/form-data"
+                id="ajax_upload_form" method="POST"
+                novalidate="">
+                  {% csrf_token %}
+                  <p>
+                      <label for="id_title">Název souboru:</label>
+                      {{ form.title }}
+                  </p>
+                  <p>
+                      <label for="id_file">Soubor</label>
+                      {{ form.file }}
+                  </p>
+                  <input type="submit" />
+               </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zavřít</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        $(document).ready(function (event) {
+            $('#id_title').keypress(function () {
+                $('#id_title').css("background", "white");
+            });
+            $('#id_file').click(function(){
+                $('#id_file').css("background", "white");
+            });
+        });
+         // form upload
+        $('#ajax_upload_form').submit(function(e){
+            e.preventDefault();
+            if ($('#id_title').val()=="" || $('#id_file').val() == "")
+            {
+                if ($('#id_title').val() == "")
+                    $('#id_title').css("background", "red");
+                if ($('#id_file').val() == "")
+                    $('#id_file').css("background", "red");
+                return 0;
+            }
+            $form = $(this)
+            var formData = new FormData(this);
+            console.log(FormData['title']);
+            $.ajax({
+                url: "{% url 'upload_file' %}",
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    ids.push(response.id);
+                    elms.push($('#id_title').val());
+                    $('#files_list').append("<p>"+$('#id_title').val()+'<button onclick="del('+response.id+');"><svg class=\"bi bi-trash\" width=\"1em\" height=\"1em\" viewBox=\"0 0 16 16\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg></button></p>');
+                    $('#id_title').val("");
+                    $('#id_file').val("");
+                    $('#FotkyexampleModalLong').modal('toggle');
+                },
+                error: function (edata) {
+                    alert("Chyba, zkuste to prosím znovu.");
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+
+        $('#send').on('click', function (event) {
+            if (ids.length == 0 || $('#name').val() == "")
+            {
+                if ($('#name').val() == "")
+                {
+                    $('errs').text("Zadejte název");
+                    $('#name').css("background", "red");
+
+                }
+                if (ids.length == 0)
+                {
+                    $('#errs').text($('errs').text()+"\nVyberte alespoň jeden soubor");
+                }
+                    $('#error').modal();
+                return 0;
+            }
+            $.ajax({
+                url: "{% url 'upload' %}",
+                type: 'POST',
+                data: {
+                    "name": $('#name').val(),
+                    "popisek": $('#popisek').val(),
+                    "files": ids.toString(),
+                    "csrfmiddlewaretoken":"{{ csrf_token }}"
+                },
+                success: function (response) {
+                    $('#success').modal();
+
+                },error: function (edata) {
+                    alert("Chyba, zkuste to znovu");
+                }
+            });
+        });
+        function del(element){
+            var index = ids.indexOf(element);
+            if (index > -1) {
+              ids.splice(index, 1);
+              elms.splice(index, 1);
+
+              $.ajax({
+                url: "{% url 'del_file' %}",
+                type: 'POST',
+                data: {
+                    "id": element,
+                    "csrfmiddlewaretoken":"{{ csrf_token }}"
+                },
+                success: function (response) {
+                    $('#files_list').html("");
+                    for (var i = 0;i<ids.length;i++)
+                    {
+                        $('#files_list').append(`<p>${elms[i]}<button onclick="del(${ids[i]});"><svg class="bi bi-trash" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg></button></p>`);
+                    }
+
+                },error: function (edata) {
+
+                }
+            });
+            }
+        }
+        $(window).on("beforeunload", function() {
+                if (ids.length != 0){
+                    $.ajax({
+                        url: "{% url 'del_all_f' %}",
+                        type: 'POST',
+                        data: {
+                            "ids": ids.toString(),
+                            "csrfmiddlewaretoken":"{{ csrf_token }}"
+                        },
+                        success: function (response) {
+                        },error: function (edata) {
+                        }
+                    });
+                }
+            })
+    </script>
+    <!-- Success -->
+    <div class="modal fade" id="success" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Nahráno</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="window.location.replace('{% url 'index' %}');">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="modal fade" id="error" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Chyba</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <H2 style="color: black;" id="errs"></H2>
+          </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zavřít</button>
+          </div>
+        </div>
+      </div>
+    </div>
+{% else %}
+    <!-- Přihlásit se -->
+    <script>
+    $(document).ready(function (event) {
+            $('#register').on('submit', function (event) {
+            event.preventDefault();
+            $.ajax({
+             type:'POST',
+             url:'{% url 'register' %}',
+             data:{
+                 'name':$("#reg_username").val(),
+                 'email': $('#reg_email').val(),
+                 'password': $('#reg_password').val(),
+                 'csrfmiddlewaretoken':'{{ csrf_token }}'
+             },
+             success: function (data) {
+                    if (data.status == "name")
+                 {
+                     alert("Jméno je již používané");
+                     $('#reg_username').css("background", "red");
+                 }
+                 else {
+                     alert("Účet vytvořen");
+                     $("#reg_username").val("");
+                     $('#reg_email').val("");
+                     $('#reg_password').val("");
+                 }
+             },
+             error: function (edata) {
+                 alert("Chyba");
+             }
+         })
+     });
+$('#sign_in').on('submit', function (event) {
+            event.preventDefault();
+            $.ajax({
+             type:'POST',
+             url:'{% url 'sign_in' %}',
+             data:{
+                 'name':$("#name").val(),
+                 'password': $('#password').val(),
+                 'csrfmiddlewaretoken':'{{ csrf_token }}'
+             },
+             success: function (data) {
+              if (data.status == "ok")
+                 {
+                     alert("Jste přihlášeni");
+                     location.reload();
+                 }
+                 else {
+                     alert("Špatné přihlšovací údaje");
+                 }
+             },
+             error: function (edata) {
+                 alert("Chyba");
+             }
+         })
+     });
+});
+    </script>
+    <div class="modal fade" id="sign_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Přihlaste se</h5>
+          </div>
+          <div class="modal-body">
+                <H2 style="color: black;">Přihlašte se, abyste mohli nahrávat</H2>
+              <form id="register">
+                  <input type="text" class="form-control" placeholder="Uživatelské jméno" id="reg_username" required/>
+                  <input type="email" class="form-control" placeholder="Email" id="reg_email" required/>
+                  <input type="password" class="form-control" placeholder="Heslo" id="reg_password" required/>
+                  <button class="btn btn-primary">Registrujte se</button>
+              </form>
+              <br>
+              <p style="text-align: center; color: black">Nebo</p>
+              <br>
+              <form id="sign_in">
+                  <input type="text" class="form-control" placeholder="Uživatelské jméno" id="name" required/>
+                  <input type="password" class="form-control" placeholder="Heslo" id="password" required/>
+                  <button class="btn btn-primary">Přihlásit se</button>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    $('#sign_modal').modal({backdrop: 'static', keyboard: false});
+    </script>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,46 @@
+@media (prefers-color-scheme: light) {
+    body {
+        background-color: white;
+    }
+    p{
+      color:black;
+    }
+    button {
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      -webkit-transition-duration: 0.4s; /* Safari */
+      transition-duration: 0.4s;
+    }
+}/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    a, H1, H3, H2, p{
+        color: white;
+    }
+    #id_title, #id_file, label{
+        color: black;
+    }
+    body {
+        background-color: black;
+    }
+    button {
+      background: green;
+      border: none;
+      color: black;
+
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      -webkit-transition-duration: 0.4s; /* Safari */
+      transition-duration: 0.4s;
+    }
+}
